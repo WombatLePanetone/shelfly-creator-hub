@@ -7,40 +7,39 @@ interface ThemeContextType {
   toggleTheme: () => void;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+// Create context with a default value to avoid undefined checks
+const ThemeContext = createContext<ThemeContextType>({
+  isDarkMode: false,
+  toggleTheme: () => {}
+});
 
 export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { theme, setTheme } = useTheme();
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [mounted, setMounted] = useState(false);
 
-  // After mounting, we can safely show the UI that depends on the theme
+  // After mounting, we can safely access the theme
   useEffect(() => {
     setMounted(true);
-    // Update dark mode state when theme changes
     setIsDarkMode(theme === 'dark');
-    console.log("Theme changed:", theme, "isDarkMode:", theme === 'dark');
+    console.log("ThemeProvider: theme mounted/changed:", theme);
   }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     setIsDarkMode(newTheme === 'dark');
-    console.log("Toggle theme:", newTheme);
+    console.log("ThemeProvider: toggling theme to:", newTheme);
   };
 
-  // Added console log for debugging
-  useEffect(() => {
-    console.log("ThemeProvider mounted, current theme:", theme);
-  }, [mounted]);
-
-  // Return children directly if not mounted yet to prevent hydration mismatches
-  if (!mounted) {
-    return <>{children}</>;
-  }
+  // Create the value object only once when values change
+  const contextValue = React.useMemo(() => ({
+    isDarkMode,
+    toggleTheme
+  }), [isDarkMode]);
 
   return (
-    <ThemeContext.Provider value={{ isDarkMode, toggleTheme }}>
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );
@@ -48,7 +47,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 export const useThemeContext = () => {
   const context = useContext(ThemeContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useThemeContext must be used within a ThemeProvider");
   }
   return context;

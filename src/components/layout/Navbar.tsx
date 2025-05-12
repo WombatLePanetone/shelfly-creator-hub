@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
   NavigationMenu,
@@ -22,8 +21,27 @@ interface NavbarProps {
 
 export function Navbar({ onSearchClick }: NavbarProps) {
   const { totalItems, setIsCartOpen } = useCart();
-  const { isDarkMode, toggleTheme } = useThemeContext();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  console.log("Navbar rendering, about to use ThemeContext");
+  // Add a fallback mechanism for safer theme access
+  let isDarkMode = false;
+  let toggleTheme = () => {};
+  
+  try {
+    // Try to get the theme context, with a fallback if it fails
+    const themeContext = useThemeContext();
+    isDarkMode = themeContext.isDarkMode;
+    toggleTheme = themeContext.toggleTheme;
+    console.log("Navbar: ThemeContext accessed successfully, isDarkMode:", isDarkMode);
+  } catch (error) {
+    console.error("Failed to access ThemeContext:", error);
+  }
+
+  // Log when the component mounts to verify order of operations
+  useEffect(() => {
+    console.log("Navbar mounted");
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur transition-all">
