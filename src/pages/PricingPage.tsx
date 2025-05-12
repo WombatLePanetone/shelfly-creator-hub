@@ -1,12 +1,31 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { pricingPlans } from "@/lib/data";
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { CheckIcon } from "lucide-react";
 
 const PricingPage = () => {
+  const [showCheckout, setShowCheckout] = useState(false);
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("");
+
+  const handleBuyNow = (planName: string) => {
+    setSelectedPlan(planName);
+    setShowCheckout(true);
+  };
+
+  const handleCheckoutSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCheckoutSuccess(true);
+    setTimeout(() => {
+      setCheckoutSuccess(false);
+      setShowCheckout(false);
+    }, 2000);
+  };
+
   return (
     <div className="container px-4 py-16 md:py-24 md:px-6">
       <div className="flex flex-col items-center justify-center space-y-4 text-center">
@@ -78,13 +97,11 @@ const PricingPage = () => {
                 ))}
               </ul>
               <Button 
-                asChild 
-                className={`mt-8 w-full ${
-                  plan.highlighted ? "bg-primary hover:bg-primary/90" : ""
-                }`}
-                variant={plan.highlighted ? "default" : "outline"}
+                onClick={() => handleBuyNow(plan.name)}
+                className="mt-8 w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                size="lg"
               >
-                <Link to={plan.buttonLink}>{plan.buttonText}</Link>
+                Unlock Everything
               </Button>
             </div>
           </motion.div>
@@ -144,6 +161,84 @@ const PricingPage = () => {
           </div>
         </div>
       </div>
+      
+      <Dialog open={showCheckout} onOpenChange={setShowCheckout}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <span>Complete Your Purchase</span>
+              <span className="text-sm font-normal text-muted-foreground">
+                {selectedPlan === "Pro Access" ? "$10/mo" : (selectedPlan === "Single Product" ? "From $19" : "$0")}
+              </span>
+            </DialogTitle>
+          </DialogHeader>
+          {checkoutSuccess ? (
+            <div className="py-6 flex flex-col items-center justify-center text-center">
+              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                <CheckIcon className="h-8 w-8 text-green-600" />
+              </div>
+              <h3 className="mt-3 text-lg font-medium">Payment successful!</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Thank you for your purchase. You'll receive download instructions shortly.
+              </p>
+            </div>
+          ) : (
+            <form onSubmit={handleCheckoutSubmit} className="space-y-4">
+              <div>
+                <label htmlFor="card-number" className="block text-sm font-medium">
+                  Card Information
+                </label>
+                <input
+                  type="text"
+                  id="card-number"
+                  placeholder="1234 1234 1234 1234"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
+                  required
+                />
+                <div className="mt-2 grid grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    placeholder="MM / YY"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
+                    required
+                  />
+                  <input
+                    type="text"
+                    placeholder="CVC"
+                    className="block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
+                    required
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium">
+                  Name on Card
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary sm:text-sm p-2 border"
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+                Complete Purchase
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
