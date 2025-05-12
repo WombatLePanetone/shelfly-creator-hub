@@ -21,10 +21,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, [theme]);
 
   const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
-    setIsDarkMode(!isDarkMode);
+    const newTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+    setIsDarkMode(newTheme === 'dark');
   };
 
+  // If not mounted yet, render children without the context
+  // This prevents hydration mismatch errors
   if (!mounted) {
     return <>{children}</>;
   }
