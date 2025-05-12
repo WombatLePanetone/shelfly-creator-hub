@@ -17,17 +17,24 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // After mounting, we can safely show the UI that depends on the theme
   useEffect(() => {
     setMounted(true);
+    // Update dark mode state when theme changes
     setIsDarkMode(theme === 'dark');
+    console.log("Theme changed:", theme, "isDarkMode:", theme === 'dark');
   }, [theme]);
 
   const toggleTheme = () => {
     const newTheme = theme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     setIsDarkMode(newTheme === 'dark');
+    console.log("Toggle theme:", newTheme);
   };
 
-  // If not mounted yet, render children without the context
-  // This prevents hydration mismatch errors
+  // Added console log for debugging
+  useEffect(() => {
+    console.log("ThemeProvider mounted, current theme:", theme);
+  }, [mounted]);
+
+  // Return children directly if not mounted yet to prevent hydration mismatches
   if (!mounted) {
     return <>{children}</>;
   }
