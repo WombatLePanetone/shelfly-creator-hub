@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
@@ -22,26 +23,38 @@ interface NavbarProps {
 export function Navbar({ onSearchClick }: NavbarProps) {
   const { totalItems, setIsCartOpen } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [themeLoaded, setThemeLoaded] = useState(false);
   
-  console.log("Navbar rendering, about to use ThemeContext");
-  // Add a fallback mechanism for safer theme access
-  let isDarkMode = false;
-  let toggleTheme = () => {};
-  
-  try {
-    // Try to get the theme context, with a fallback if it fails
-    const themeContext = useThemeContext();
-    isDarkMode = themeContext.isDarkMode;
-    toggleTheme = themeContext.toggleTheme;
-    console.log("Navbar: ThemeContext accessed successfully, isDarkMode:", isDarkMode);
-  } catch (error) {
-    console.error("Failed to access ThemeContext:", error);
-  }
-
   // Log when the component mounts to verify order of operations
   useEffect(() => {
     console.log("Navbar mounted");
   }, []);
+  
+  // Safely access theme context with error handling
+  let toggleTheme = () => {
+    console.log("Fallback theme toggle used");
+    setIsDarkMode(!isDarkMode);
+  };
+  
+  try {
+    // Try to get the theme context
+    const themeContext = useThemeContext();
+    
+    // Only update if we have a valid context
+    useEffect(() => {
+      if (themeContext) {
+        setIsDarkMode(themeContext.isDarkMode);
+        setThemeLoaded(true);
+        console.log("Navbar: ThemeContext accessed successfully, isDarkMode:", themeContext.isDarkMode);
+      }
+    }, [themeContext.isDarkMode]);
+    
+    // Use the context's toggle function
+    toggleTheme = themeContext.toggleTheme;
+  } catch (error) {
+    console.error("Failed to access ThemeContext:", error);
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/95 backdrop-blur transition-all">

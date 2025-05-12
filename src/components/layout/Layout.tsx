@@ -11,6 +11,7 @@ interface LayoutProps {
 }
 
 export function Layout({ children }: LayoutProps) {
+  console.log("Layout rendering");
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
   return (
